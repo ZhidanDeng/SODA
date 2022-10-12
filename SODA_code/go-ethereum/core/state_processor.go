@@ -33,6 +33,8 @@ import (
 	"github.com/ethereum/go-ethereum/tingrong"
 	"github.com/ethereum/go-ethereum/cmd/pluginManage"
 	"github.com/ethereum/go-ethereum/fei"
+		//dzd
+	_ "github.com/ethereum/go-ethereum/dzd"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
@@ -120,11 +122,22 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 // for the transaction, gas used and an error if the transaction failed,
 // indicating the block was invalid.
 func ApplyTransaction(config *params.ChainConfig, bc ChainContext, author *common.Address, gp *GasPool, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *uint64, cfg vm.Config) (*types.Receipt, uint64, error) {
+	startTime := time.Now()
 	msg, err := tx.AsMessage(types.MakeSigner(config, header.Number))
 	if err != nil {
 		return nil, 0, err
 	}
-
+	//added by dzd
+	//fmt.Printf("mf:", mf)
+	//msg.To 为空时，该交易是创建合约
+	if msg.To() != nil {
+		if mf.Check(msg.To().String()) {
+			elapsedTime := time.Since(startTime) // duration in ns
+			fmt.Printf("地址：%s", msg.To().String())
+			fmt.Printf("二次检测的时间：%d(ns)", elapsedTime)
+			//statedb.RevertToSnapshot(rongting.PLUGIN_SNAPSHOT_ID)
+		}
+	}
 	// Create a new context to be used in the EVM environment
 	context := NewEVMContext(msg, header, bc, author)
 	// Create a new environment which holds all relevant information
