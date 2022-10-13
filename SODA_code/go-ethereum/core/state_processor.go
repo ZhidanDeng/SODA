@@ -35,6 +35,7 @@ import (
 	"github.com/ethereum/go-ethereum/fei"
 		//dzd
 	_ "github.com/ethereum/go-ethereum/dzd"
+	"time"
 )
 
 // StateProcessor is a basic Processor, which takes care of transitioning
@@ -46,7 +47,7 @@ type StateProcessor struct {
 	bc     *BlockChain         // Canonical block chain
 	engine consensus.Engine    // Consensus engine used for block rewards
 }
-
+var mf = dzd.NewMyFilter()
 // NewStateProcessor initialises a new StateProcessor.
 func NewStateProcessor(config *params.ChainConfig, bc *BlockChain, engine consensus.Engine) *StateProcessor {
 	return &StateProcessor{
