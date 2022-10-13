@@ -6,6 +6,8 @@ import (
 	"github.com/json-iterator/go"
 	"math/big"
 	"strings"
+	//dzd
+	"time"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -24,6 +26,7 @@ type DaoInfo struct {
 	TotalCycleCount  uint64              `json:"totalcyclecount"`
 	TotalValueCount  string              `json:"totalvaluecount"`
 	InternalLog      string              `json:"internallog"`
+	TimeSpent 	 time.Duration	     `json:"timespent"`
 }
 
 type Node struct {
@@ -144,6 +147,7 @@ func Handle_EXTERNALINFOEND(m *collector.AllCollector) (byte, string) {
 
 // 判断有没有环，顺便把所有的调用记录下来
 func procCycleInfo() string {
+	timeStart := time.Now()
 	// cur_p = &head
 	cur_p = &root // 换成EOA调用的第一个地址
 	nodes := []*Node{cur_p}
@@ -222,7 +226,7 @@ func procCycleInfo() string {
 	if totalCycleCount == 0 {
 		return ""
 	}
-
+	timeSpent := time.Since(timeStart)/1000    //us
 	var daoInfo = DaoInfo {
 		BlockNumber:      blocknumber,
 		TxHash:           txhash,
@@ -233,6 +237,7 @@ func procCycleInfo() string {
 		TotalValueCount:  totalValueCount.String(),
 		InternalLog:      "", // 先不写，太多了 占空间
 		// InternalLog:      totalCallStr,
+		TimeSpent:	  timeSpent,
 	}
 	daoJsonData, err := json.Marshal(daoInfo)
 	if err != nil {
